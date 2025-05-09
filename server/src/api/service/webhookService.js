@@ -1,6 +1,7 @@
 const config = require("../../config/lineConfig");
 const fs = require('fs');
 const path = require('path');
+const openaiService = require('./openaiService');
 
 const handleEvents = async (event) => {
     if (event.type !== 'message') {
@@ -40,5 +41,18 @@ const handleEvents = async (event) => {
 
     return null;
 };
-
-module.exports = {handleEvents}
+const handleEventsOpenai = async (event) => {
+    if (event.type !== 'message' || event.message.type !== 'text') {
+        return null;
+    }
+    console.log(event);
+    const prompt = event.message.text;
+    const text = await openaiService.generateText(prompt);
+    return config.client.replyMessage(event.replyToken, [
+        {
+            "type": "text",
+            "text": text
+        }
+    ]);
+};
+module.exports = {handleEvents, handleEventsOpenai}

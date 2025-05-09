@@ -1,0 +1,25 @@
+{
+    "version": 2,
+    "builds": [
+      {
+        "src": "frontend/package.json",
+        "use": "@vercel/next",
+        "config": {
+          "workPath": "frontend" 
+        }
+      },
+      {
+        "src": "server/server.js", 
+        "use": "@vercel/node",
+        "config": {
+          "workPath": "server"
+        }
+      }
+    ],
+    "routes": [
+      {
+        "src": "/api/(.*)",
+        "dest": "server/server.js"
+      }
+    ]
+  }
