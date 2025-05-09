@@ -15,4 +15,4 @@ if (process.env.OPENAI_BASE_URL) {
 
 const openaiClient = new OpenAI(config);
 
-module.exports = {openaiClient};
+module.exports = openaiClient;
