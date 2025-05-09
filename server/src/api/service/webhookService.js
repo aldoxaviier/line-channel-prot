@@ -1,6 +1,7 @@
 const config = require("../../config/lineConfig");
 const fs = require('fs');
 const path = require('path');
+const ngrok = process.env.NGROK;
 
 const handleEvents = async (event) => {
     if (event.type !== 'message') {
@@ -21,7 +22,6 @@ const handleEvents = async (event) => {
         const filePath = path.resolve(__dirname, '../../../public/images', `${event.message.id}.jpg`);
         const writable = fs.createWriteStream(filePath);
         stream.pipe(writable);
-        const ngrok = 'https://1ac4-36-71-71-91.ngrok-free.app';
         
         // Wait until the file is saved before replying
         await new Promise((resolve, reject) => {
