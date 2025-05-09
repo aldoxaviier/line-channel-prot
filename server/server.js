@@ -2,8 +2,7 @@ const express = require('express');
 const line = require('@line/bot-sdk');
 require('dotenv').config();
 const PORT = process.env.PORT;
-const accessToken = process.env.CHANNEL_ACCESS_TOKEN
-const secret = process.env.CHANNEL_SECRET
+const path = require('path');
 
 const app = express();
 
@@ -12,7 +11,7 @@ app.use("/webhook",require("./src/api/router/webhookRouter"));
 app.use(express.json());
 
 app.use("/message",require("./src/api/router/messageRouter"));
-
+app.use('/images', express.static(path.join(__dirname, 'public/images')));
 
 // const config = {
 //     channelAccessToken: accessToken,
