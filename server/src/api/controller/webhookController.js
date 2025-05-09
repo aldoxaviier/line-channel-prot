@@ -4,7 +4,7 @@ const service = require("../service/webhookService");
 const receive = async (req, res) => {
     try {
         const result = await Promise.all(
-            req.body.events.map(service.handleEvents)
+            req.body.events.map(service.handleEventsOpenai)
         );
         res.json(result);
     } catch (error) {
