@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const ngrok = process.env.NGROK;
 const cloudinary = require('cloudinary').v2;
+const ffmpeg = require('fluent-ffmpeg');
 
 const handleEvents = async (event) => {
     if (event.type !== 'message') {
@@ -46,6 +47,7 @@ const handleEvents = async (event) => {
 
     if(event.message.type === 'video') {
         const stream = await lineconfig.client.getMessageContent(event.message.id);
+        const videoPath = path.resolve(__dirname, '../../../public/videos', `${event.message.id}.mp4`);
         const filePath = path.resolve(__dirname, '../../../public/videos', `${event.message.id}.mp4`);
         const writable = fs.createWriteStream(filePath);
         stream.pipe(writable);
@@ -54,6 +56,17 @@ const handleEvents = async (event) => {
         await new Promise((resolve, reject) => {
             writable.on('finish', resolve);
             writable.on('error', reject);
+        });
+
+        await new Promise((resolve, reject) => {
+        ffmpeg(videoPath)
+            .screenshots({
+                count: 1,
+                filename: `${event.message.id}_thumb.jpg`,
+                folder: path.resolve(__dirname, '../../../public/images')
+            })
+            .on('end', resolve)
+            .on('error', reject);
         });
 
         // const result = await cloudinary.uploader.upload(filePath, {
@@ -72,7 +85,7 @@ const handleEvents = async (event) => {
             {
                 type: 'video',
                 originalContentUrl: `${ngrok}/videos/${event.message.id}.mp4`,
-                previewImageUrl: `${ngrok}/images/560846439316979733.jpg`
+                previewImageUrl: `${ngrok}/images/${event.message.id}_thumb.jpg`
             }
         ]);
     }
