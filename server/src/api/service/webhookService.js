@@ -1,7 +1,8 @@
-const config = require("../../config/lineConfig");
+const lineconfig = require("../../config/lineConfig");
 const fs = require('fs');
 const path = require('path');
 const ngrok = process.env.NGROK;
+const cloudinary = require('cloudinary').v2;
 
 const handleEvents = async (event) => {
     if (event.type !== 'message') {
@@ -9,7 +10,7 @@ const handleEvents = async (event) => {
     }
     console.log(event);
     if(event.message.type === 'text'){
-        return config.client.replyMessage(event.replyToken, [
+        return lineconfig.client.replyMessage(event.replyToken, [
             {
                 "type": "text",
                 "text": event.message.text
@@ -17,9 +18,35 @@ const handleEvents = async (event) => {
         ]);
     }
 
+    // cloudinary.config({
+    //     cloud_name: process.env.CLOUD_NAME,
+    //     api_key: process.env.CLOUD_API_KEY,
+    //     api_secret: process.env.CLOUD_API_SECRET
+    // });
+
     if(event.message.type === 'image'){
-        const stream = await config.client.getMessageContent(event.message.id);
+        const stream = await lineconfig.client.getMessageContent(event.message.id);
         const filePath = path.resolve(__dirname, '../../../public/images', `${event.message.id}.jpg`);
+        const writable = fs.createWriteStream(filePath);
+        stream.pipe(writable);
+
+        await new Promise((resolve, reject) => {
+            writable.on('finish', resolve);
+            writable.on('error', reject);
+        });
+
+        return lineconfig.client.replyMessage(event.replyToken, [
+            {
+                type: 'image',
+                originalContentUrl: `${ngrok}/images/${event.message.id}.jpg`,
+                previewImageUrl: `${ngrok}/images/${event.message.id}.jpg`
+            }
+        ]);
+    }
+
+    if(event.message.type === 'video') {
+        const stream = await lineconfig.client.getMessageContent(event.message.id);
+        const filePath = path.resolve(__dirname, '../../../public/videos', `${event.message.id}.mp4`);
         const writable = fs.createWriteStream(filePath);
         stream.pipe(writable);
         
@@ -29,11 +56,23 @@ const handleEvents = async (event) => {
             writable.on('error', reject);
         });
 
-        return config.client.replyMessage(event.replyToken, [
+        // const result = await cloudinary.uploader.upload(filePath, {
+        //   resource_type: 'video',
+        //   folder: 'line_uploads'
+        // });
+
+        // fs.unlinkSync(filePath);
+
+        // return lineconfig.client.replyMessage(event.replyToken, {
+        //   type: 'text',
+        //   text: `Video uploaded to Cloudinary: ${result.secure_url}`
+        // });
+        
+        return lineconfig.client.replyMessage(event.replyToken, [
             {
-                type: 'image',
-                originalContentUrl: `${ngrok}/images/${event.message.id}.jpg`,
-                previewImageUrl: `${ngrok}/images/${event.message.id}.jpg`
+                type: 'video',
+                originalContentUrl: `${ngrok}/videos/${event.message.id}.mp4`,
+                previewImageUrl: `${ngrok}/images/560846439316979733.jpg`
             }
         ]);
     }

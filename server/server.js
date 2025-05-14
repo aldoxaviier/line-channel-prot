@@ -12,6 +12,7 @@ app.use(express.json());
 
 app.use("/message",require("./src/api/router/messageRouter"));
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
+app.use('/videos', express.static(path.join(__dirname, 'public/videos')));
 
 // const config = {
 //     channelAccessToken: accessToken,
