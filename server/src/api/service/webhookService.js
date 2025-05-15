@@ -4,12 +4,14 @@ const path = require('path');
 const ngrok = process.env.NGROK;
 const cloudinary = require('cloudinary').v2;
 const ffmpeg = require('fluent-ffmpeg');
+const repository = require('../repository/messageRepository');
 
 const handleEvents = async (event) => {
     if (event.type !== 'message') {
         return null;
     }
     console.log(event);
+    // getUserProfile(event.source.userId);
     if(event.message.type === 'text'){
         return lineconfig.client.replyMessage(event.replyToken, [
             {
@@ -92,5 +94,20 @@ const handleEvents = async (event) => {
 
     return null;
 };
+
+// const getUserProfile = async (userId) => {
+//     try {
+//         const user = await fetch(`https://api.line.me/v2/bot/profile/${userId}`, {
+//             method: 'GET',
+//             headers: {
+//                 'Authorization': `Bearer ${lineconfig.config.channelAccessToken}`
+//             }
+//         });
+//         const userProfile = await user.json();
+//         return userProfile;
+//     } catch (err) {
+//         console.error(err.message);
+//     }
+// }
 
 module.exports = {handleEvents}

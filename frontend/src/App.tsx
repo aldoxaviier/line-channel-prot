@@ -1,35 +1,66 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import './App.css';
+import UserList from './components/UserList';
+import ChatBox from './components/ChatBox';
+
+// Temporary mock data
+const mockUsers = [
+  {
+    id: '1',
+    name: 'John Doe',
+    avatar: 'https://api.dicebear.com/6.x/avataaars/svg?seed=John',
+    lastMessage: 'Hey, how are you?'
+  },
+  {
+    id: '2',
+    name: 'Jane Smith',
+    avatar: 'https://api.dicebear.com/6.x/avataaars/svg?seed=Jane',
+    lastMessage: 'See you tomorrow!'
+  },
+];
+
+const mockMessages = [
+  {
+    id: '1',
+    text: 'Hi there!',
+    sender: 'user',
+    timestamp: new Date(),
+  },
+  {
+    id: '2',
+    text: 'Hello! How can I help you today?',
+    sender: 'other',
+    timestamp: new Date(),
+  },
+];
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [selectedUserId, setSelectedUserId] = useState<string>();
+  const selectedUser = mockUsers.find(user => user.id === selectedUserId);
+
+  const handleSendMessage = (message: string) => {
+    console.log('Sending message:', message);
+    // Here you would typically send the message to your backend
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="flex h-screen bg-gray-100">
+      <div className="w-1/3 border-r border-gray-200">
+        <UserList
+          users={mockUsers}
+          selectedUserId={selectedUserId}
+          onSelectUser={setSelectedUserId}
+        />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+      <div className="flex-1">
+        <ChatBox
+          selectedUser={selectedUser}
+          messages={mockMessages}
+          onSendMessage={handleSendMessage}
+        />
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+export default App;
