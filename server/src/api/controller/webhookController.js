@@ -1,11 +1,14 @@
 const config = require("../../config/lineConfig");
 const service = require("../service/webhookService");
 
+// receive events from line
 const receive = async (req, res) => {
     try {
-        const result = await Promise.all(
+        // handle events from line
+        const result = await Promise.all( // promise.all to handle all events
             req.body.events.map(service.handleEvents)
         );
+        // return result
         res.json(result);
     } catch (error) {
         console.error(error);

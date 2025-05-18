@@ -13,6 +13,7 @@ const handleEvents = async (event) => {
     console.log(event);
     // getUserProfile(event.source.userId);
     if(event.message.type === 'text'){
+        // text message => return the same message
         return lineconfig.client.replyMessage(event.replyToken, [
             {
                 "type": "text",
@@ -28,11 +29,14 @@ const handleEvents = async (event) => {
     // });
 
     if(event.message.type === 'image'){
+        // get image from line
         const stream = await lineconfig.client.getMessageContent(event.message.id);
+        // save image to public/images
         const filePath = path.resolve(__dirname, '../../../public/images', `${event.message.id}.jpg`);
         const writable = fs.createWriteStream(filePath);
         stream.pipe(writable);
 
+        // save image to database
         await new Promise((resolve, reject) => {
             writable.on('finish', resolve);
             writable.on('error', reject);
@@ -48,7 +52,10 @@ const handleEvents = async (event) => {
     }
 
     if(event.message.type === 'video') {
+        // get video from line
         const stream = await lineconfig.client.getMessageContent(event.message.id);
+
+        // save video to public/videos
         const videoPath = path.resolve(__dirname, '../../../public/videos', `${event.message.id}.mp4`);
         const filePath = path.resolve(__dirname, '../../../public/videos', `${event.message.id}.mp4`);
         const writable = fs.createWriteStream(filePath);
@@ -60,6 +67,7 @@ const handleEvents = async (event) => {
             writable.on('error', reject);
         });
 
+        // save thumbnail to public/images
         await new Promise((resolve, reject) => {
         ffmpeg(videoPath)
             .screenshots({
@@ -83,6 +91,7 @@ const handleEvents = async (event) => {
         //   text: `Video uploaded to Cloudinary: ${result.secure_url}`
         // });
         
+        // return video and thumbnail
         return lineconfig.client.replyMessage(event.replyToken, [
             {
                 type: 'video',
