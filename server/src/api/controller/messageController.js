@@ -1,16 +1,25 @@
 const config = require("../../config/lineConfig");
+const messageRepository = require("../repository/messageRepository");   
+const messageService = require("../service/messageService");
 
 const send = async(req,res) => {
     try {
-        const {message} = req.body;
-        config.client.pushMessage("Ua01d445653d2669d792cf977188b6116",{
-            type: 'text',
-            text: message
-        })
+        const {message,userId} = req.body;
+        messageService.handleEvents(message, userId)
         res.json("berhasil");
     } catch (err) {
         console.error(err.message);
     }
 }
 
-module.exports = {send}
+const getAllMessage = async (req,res) => {
+    try {
+        const {userId} = req.params;
+        const message = await messageRepository.getAllMessage(userId);
+        res.json(message);
+    } catch (err) {
+        console.error(err.message);
+    }
+}
+
+module.exports = {send,getAllMessage}

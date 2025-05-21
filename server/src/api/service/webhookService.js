@@ -2,17 +2,27 @@ const lineconfig = require("../../config/lineConfig");
 const fs = require('fs');
 const path = require('path');
 const ngrok = process.env.NGROK;
+const local = process.env.LOCAL;
 const cloudinary = require('cloudinary').v2;
 const ffmpeg = require('fluent-ffmpeg');
-const repository = require('../repository/messageRepository');
+const messageRepository = require('../repository/messageRepository');
+const userRepository = require('../repository/userRepository');
 
 const handleEvents = async (event) => {
+    const direction = "in";
     if (event.type !== 'message') {
         return null;
     }
     console.log(event);
-    // getUserProfile(event.source.userId);
+    const userprofile = await getUserProfile(event.source.userId);
+    const check = await checkId(userprofile.userId);
+    if (!check) {
+        await userRepository.addUser(userprofile.userId, userprofile.displayName, userprofile.pictureUrl);
+    }    
     if(event.message.type === 'text'){
+        // Save message to database first
+        await messageRepository.addMessage(event.message.id, event.source.userId, direction, event.message.text, event.message.type);
+        // Then reply with the same message
         return lineconfig.client.replyMessage(event.replyToken, [
             {
                 "type": "text",
@@ -37,6 +47,9 @@ const handleEvents = async (event) => {
             writable.on('finish', resolve);
             writable.on('error', reject);
         });
+        
+        const pictureurl = `images/${event.message.id}.jpg`;
+        await messageRepository.addMessage(event.message.id, event.source.userId, direction, pictureurl,event.message.type);
 
         return lineconfig.client.replyMessage(event.replyToken, [
             {
@@ -45,6 +58,7 @@ const handleEvents = async (event) => {
                 previewImageUrl: `${ngrok}/images/${event.message.id}.jpg`
             }
         ]);
+    
     }
 
     if(event.message.type === 'video') {
@@ -54,7 +68,6 @@ const handleEvents = async (event) => {
         const writable = fs.createWriteStream(filePath);
         stream.pipe(writable);
         
-        // Wait until the file is saved before replying
         await new Promise((resolve, reject) => {
             writable.on('finish', resolve);
             writable.on('error', reject);
@@ -70,6 +83,9 @@ const handleEvents = async (event) => {
             .on('end', resolve)
             .on('error', reject);
         });
+
+        const videourl = `videos/${event.message.id}.mp4`;
+        await messageRepository.addMessage(event.message.id, event.source.userId, direction, videourl,event.message.type);
 
         // const result = await cloudinary.uploader.upload(filePath, {
         //   resource_type: 'video',
@@ -95,19 +111,28 @@ const handleEvents = async (event) => {
     return null;
 };
 
-// const getUserProfile = async (userId) => {
-//     try {
-//         const user = await fetch(`https://api.line.me/v2/bot/profile/${userId}`, {
-//             method: 'GET',
-//             headers: {
-//                 'Authorization': `Bearer ${lineconfig.config.channelAccessToken}`
-//             }
-//         });
-//         const userProfile = await user.json();
-//         return userProfile;
-//     } catch (err) {
-//         console.error(err.message);
-//     }
-// }
+    const getUserProfile = async (userId) => {
+        try {
+            const user = await fetch(`https://api.line.me/v2/bot/profile/${userId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${lineconfig.config.channelAccessToken}`
+                }
+            });
+            const userProfile = await user.json();
+            return userProfile;
+        } catch (err) {
+            console.error(err.message);
+        }
+    }
+
+    const checkId = async (userId) => {
+        const user = await userRepository.getUserById(userId);
+        if (user) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
 module.exports = {handleEvents}
