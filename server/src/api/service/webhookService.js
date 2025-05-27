@@ -23,12 +23,6 @@ const handleEvents = async (event) => {
         // Save message to database first
         await messageRepository.addMessage(event.message.id, event.source.userId, direction, event.message.text, event.message.type);
         // Then reply with the same message
-        return lineconfig.client.replyMessage(event.replyToken, [
-            {
-                "type": "text",
-                "text": event.message.text
-            }
-        ]);
     }
 
     // cloudinary.config({

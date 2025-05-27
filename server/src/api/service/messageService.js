@@ -1,11 +1,12 @@
 const { customAlphabet } = require('nanoid');
+const messageRepository = require('../repository/messageRepository');
+const config = require('../../config/lineConfig');
 
-
-const handleEvents = () => {
+const handleEvents = (message,userId) => {
     const nanoid = customAlphabet('0123456789', 18);
     const id = nanoid();
     messageRepository.addMessage(id,userId,"out",message,"text");
-    config.client.pushMessage("Ua01d445653d2669d792cf977188b6116",{
+    config.client.pushMessage(userId,{
         type: 'text',
         text: message
     })

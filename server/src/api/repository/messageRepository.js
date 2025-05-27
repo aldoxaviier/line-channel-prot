@@ -10,4 +10,14 @@ const getAllMessage = async(userId) => {
     return message.rows;
 }
 
-module.exports = {addMessage,getAllMessage};
+const getLastMessage = async(userId) => {
+    const message = await pool.query("SELECT message FROM messages WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1", [userId]);
+    return message.rows[0];
+} 
+
+const readStatus = async(messageId) => {
+    const message = await pool.query("UPDATE messages set isread = true WHERE id = $1 RETURNING *", [messageId]);
+    return message.rows[0];
+}
+
+module.exports = {addMessage,getAllMessage,getLastMessage,readStatus};
