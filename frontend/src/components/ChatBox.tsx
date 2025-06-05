@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 interface Message {
   id: string;
@@ -23,6 +23,20 @@ interface ChatBoxProps {
 const ChatBox: React.FC<ChatBoxProps> = ({ selectedUser, messages, onSendMessage }) => {
   const [newMessage, setNewMessage] = useState('');
   const [isRead, setIsRead] = useState(0);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  const instantScrollToBottom = () => {
+    if (messagesEndRef.current) {
+      const container = messagesEndRef.current.parentElement;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }
+  };
+
+  useEffect(() => {
+    instantScrollToBottom();
+  }, [messages]); // Scroll when messages change
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,6 +95,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ selectedUser, messages, onSendMessage
             </div>
           </div>
         ))}
+        <div ref={messagesEndRef} /> 
       </div>
 
       {/* Message Input */}

@@ -4,8 +4,9 @@ require('dotenv').config();
 const PORT = process.env.PORT;
 const path = require('path');
 const cors = require('cors');
-
 const app = express();
+const server = require('http').createServer(app);
+const wsservice = require("./src/api/service/websocketService");
 
 app.use("/webhook",require("./src/api/router/webhookRouter"));
 
@@ -18,34 +19,8 @@ app.use('/images', express.static(path.join(__dirname, 'public/images')));
 app.use('/videos', express.static(path.join(__dirname, 'public/videos')));
 app.use('/user', require("./src/api/router/userRouter"));
 
-// const config = {
-//     channelAccessToken: accessToken,
-//     channelSecret: secret
-// }
+wsservice.startChat(server);
 
-// app.post('/webhook', line.middleware(config),(req,res)=>{
-//     Promise
-//         .all([
-//             req.body.events.map(handleEvents)
-//         ])
-//         .then((result) => res.json(result))
-// });
-
-// const client = new line.Client(config);
-
-// const handleEvents = (event) => {
-//     if(event.type !== 'message' || event.message.type !== 'text'){
-//         return Promise.resolve(null);
-//     }
-//     console.log(event);
-//     return client.replyMessage(event.replyToken,[
-//         {
-//             "type": "text",
-//             "text": `${event.message.text}`
-//         }
-//     ])
-// }
-
-app.listen(PORT, () => {
+server.listen(PORT, () => {
 console.log(`Server running at ${PORT}`);
 });

@@ -6,7 +6,6 @@ interface User {
   picture_url: string;
   last_message?: string;
 }
-
 interface UserListProps {
   users: User[];
   selectedUserId?: string;

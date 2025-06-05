@@ -7,6 +7,8 @@ const cloudinary = require('cloudinary').v2;
 const ffmpeg = require('fluent-ffmpeg');
 const messageRepository = require('../repository/messageRepository');
 const userRepository = require('../repository/userRepository');
+const webSocketService = require('./websocketService');
+
 
 const handleEvents = async (event) => {
     const direction = "in";
@@ -18,11 +20,15 @@ const handleEvents = async (event) => {
     const check = await checkId(userprofile.userId);
     if (!check) {
         await userRepository.addUser(userprofile.userId, userprofile.displayName, userprofile.pictureUrl);
-    }    
+    }
+
+    const io = webSocketService.getIO();
+    const socketid = webSocketService.getSocketid();
+
     if(event.message.type === 'text'){
         // Save message to database first
-        await messageRepository.addMessage(event.message.id, event.source.userId, direction, event.message.text, event.message.type);
-        // Then reply with the same message
+        const message = await messageRepository.addMessage(event.message.id, event.source.userId, direction, event.message.text, event.message.type);
+        io.to(socketid).emit('incoming-message',message)
     }
 
     // cloudinary.config({
@@ -100,7 +106,7 @@ const handleEvents = async (event) => {
         //   text: `Video uploaded to Cloudinary: ${result.secure_url}`
         // });
         
-        // return video and thumbnail
+
         return lineconfig.client.replyMessage(event.replyToken, [
             {
                 type: 'video',
