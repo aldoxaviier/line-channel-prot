@@ -4,16 +4,16 @@ interface User {
   user_id: string;
   display_name: string;
   picture_url: string;
-  last_message?: string;
+  last_message: string;
+  unread_count: number;
 }
 interface UserListProps {
   users: User[];
   selectedUserId?: string;
   onSelectUser: (userId: string) => void;
-  notRead: number;
 }
 
-const UserList: React.FC<UserListProps> = ({ users, selectedUserId, onSelectUser, notRead }) => {
+const UserList: React.FC<UserListProps> = ({ users, selectedUserId, onSelectUser}) => {
 
   return (
     <div className="w-full h-full bg-white border-r border-gray-200">
@@ -24,7 +24,7 @@ const UserList: React.FC<UserListProps> = ({ users, selectedUserId, onSelectUser
         {users.map((user) => (
           <div
             key={user.user_id}
-            className={`flex items-center p-4 cursor-pointer hover:bg-gray-50 ${
+            className={`flex items-center p-4 cursor-pointer ${
               selectedUserId === user.user_id ? 'bg-gray-100' : ''
             }`}
             onClick={() => onSelectUser(user.user_id)}
@@ -38,9 +38,9 @@ const UserList: React.FC<UserListProps> = ({ users, selectedUserId, onSelectUser
               <h3 className="font-medium text-gray-900">{user.display_name}</h3>
                 <p className="text-sm text-gray-500 truncate">{user.last_message? user.last_message : "Start a chat"}</p>
             </div>
-            {notRead > 0 && (
+            {user.unread_count > 0 && (
               <span className="ml-auto bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-                {notRead}
+                {user.unread_count}
               </span>
             )}
           </div>

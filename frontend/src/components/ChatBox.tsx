@@ -82,16 +82,22 @@ const ChatBox: React.FC<ChatBoxProps> = ({ selectedUser, messages, onSendMessage
             }`}
           >
             <div
-              className={`max-w-[70%] rounded-lg p-3 ${
+              className={`flex flex-col max-w-[70%] rounded-lg p-2 ${
                 message.direction === 'out'
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-100 text-gray-900'
               }`}
             >
               <p>{message.message}</p>
-              <span className="text-xs opacity-75">
-                {message.timestamp}
-              </span>
+              <div className={`flex ${message.direction === 'out' ? 'justify-end' : 'justify-start'}`}>
+                <span className="text-xs opacity-75">
+                  {new Date(message.timestamp).toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                  }).replace(':', '.')}
+                </span>
+              </div>
             </div>
           </div>
         ))}

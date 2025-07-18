@@ -1,7 +1,12 @@
 const pool = require('../../config/db');
 
 const addMessage = async(id,userId,direction,msg,type) => {
-    const newMessage = await pool.query("INSERT INTO messages (id,user_id,direction,message,timestamp,type) VALUES ($1,$2,$3,$4,NOW(),$5) RETURNING *", [id,userId,direction,msg,type]);
+    let newMessage;
+    if(direction === 'out'){
+        newMessage = await pool.query("INSERT INTO messages (id,user_id,direction,message,timestamp,type,isread) VALUES ($1,$2,$3,$4,NOW(),$5,true) RETURNING *", [id,userId,direction,msg,type]);
+    }else{
+        newMessage = await pool.query("INSERT INTO messages (id,user_id,direction,message,timestamp,type) VALUES ($1,$2,$3,$4,NOW(),$5) RETURNING *", [id,userId,direction,msg,type]);
+    }
     return newMessage.rows[0];
 }
 
@@ -15,9 +20,9 @@ const getLastMessage = async(userId) => {
     return message.rows[0];
 } 
 
-const readStatus = async(messageId) => {
-    const message = await pool.query("UPDATE messages set isread = true WHERE id = $1 RETURNING *", [messageId]);
-    return message.rows[0];
+const updateRead = async(userId) => {
+    const message = await pool.query("UPDATE messages set isread = true WHERE isread = false AND user_id = $1 RETURNING *",[userId]);
+    return message.rows;
 }
 
-module.exports = {addMessage,getAllMessage,getLastMessage,readStatus};
+module.exports = {addMessage,getAllMessage,getLastMessage, updateRead};

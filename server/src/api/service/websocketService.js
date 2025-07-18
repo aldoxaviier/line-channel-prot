@@ -1,5 +1,6 @@
 const { Server } = require('socket.io');
 const messageService = require('./messageService');
+const messageRepository = require('../repository/messageRepository');
 let io;
 let socketid;
 
@@ -17,6 +18,9 @@ const startChat = async(server) => {
             const {message,selectedUserId} = body;
             messageService.handleEvents(message, selectedUserId);
         })
+        socket.on('read-messages', (userId) =>{
+            messageRepository.updateRead(userId);
+        });
     });
 }
 
